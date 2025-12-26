@@ -1,6 +1,7 @@
 const cors = require("cors");
 const express = require("express");
 const app = express();
+const productsRouter = require("./products");
 
 app.use(
   cors({
@@ -9,6 +10,8 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use("/products", productsRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!");
@@ -22,26 +25,6 @@ app.get("/contact", (req, res) => {
   res.send("Contact Us Page");
 });
 
-app.get("/products", (req, res) => {
-  res.json([
-    { id: 1, name: "Laptop", price: 1299 },
-    { id: 2, name: "Mouse", price: 899 },
-    { id: 3, name: "Phone", price: 499 },
-  ]);
-});
-
-app.get("/products/:id", (req, res) => {
-  const id = Number(req.params.id);
-
-  const products = [
-    { id: 1, name: "Laptop", price: 1299 },
-    { id: 2, name: "Mouse", price: 899 },
-    { id: 3, name: "Phone", price: 499 },
-  ];
-
-  const requestedProduct = products.find((product) => product.id === id);
-  res.json(requestedProduct);
-});
 
 app.get("/message", (req, res) => {
   res.json({ message: "This is a message from the express backend." });
@@ -55,7 +38,7 @@ app.post("/message", (req, res) => {
 
 app.post("/contact", (req, res) => {
   const { name, message } = req.body;
-  console.log("New contact message:", name, message);
+  console.log("New contact message:", name, "said", message);
   res.json({ status: "success", message: "Thank you for contacting us!" });
 });
 
