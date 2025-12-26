@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo App Frontend</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 40px auto;
+      }
+      input,
+      button {
+        padding: 10px;
+        margin: 5px 0;
+      }
+      .todo-item {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .completed {
+        text-decoration: line-through;
+        color: gray;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Todo List</h1>
+
+    <!-- Create Task -->
+    <input type="text" id="taskInput" placeholder="Enter a task" />
+    <button onclick="createTodo()">Add Task</button>
+
+    <h2>Your Todos</h2>
+    <div id="todoList"></div>
+
+    <script>
+      const API_URL = "http://localhost:3000/todos";
+
+      // Fetch and display todos
+      async function loadTodos() {
+        const res = await fetch(API_URL);
+        const todos = await res.json();
+
+        const todoList = document.getElementById("todoList");
+        todoList.innerHTML = "";
+
+        todos.forEach((todo) => {
+          const div = document.createElement("div");
+          div.className = "todo-item";
+
+          div.innerHTML = `
+          <span class="${todo.completed ? "completed" : ""}">
+            ${todo.id}. ${todo.task}
+          </span>
+          <div>
+            <button onclick="toggleComplete(${todo.id}, ${
+            todo.completed
+          })">Toggle</button>
+            <button onclick="deleteTodo(${todo.id})">Delete</button>
+          </div>
+        `;
+
+          todoList.appendChild(div);
+        });
+      }
+
+      // Create a new todo
+      async function createTodo() {
+        const task = document.getElementById("taskInput").value;
+        if (!task) return alert("Enter a task first");
+
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ task }),
+        });
+
+        document.getElementById("taskInput").value = "";
+        loadTodos();
+      }
+
+      // Toggle completed state
+      async function toggleComplete(id, currentStatus) {
+        await fetch(`${API_URL}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed: !currentStatus }),
+        });
+
+        loadTodos();
+      }
+
+      // Delete todo
+      async function deleteTodo(id) {
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        loadTodos();
+      }
+
+      // Load todos initially
+      loadTodos();
+    </script>
+  </body>
+</html>
